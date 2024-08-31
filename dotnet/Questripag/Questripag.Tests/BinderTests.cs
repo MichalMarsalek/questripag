@@ -36,14 +36,5 @@ namespace Questripag.Tests
         private IQueryCollection ParseQueryCollection(string queryString)
             => new QueryCollection(queryString.Split("&").ToDictionary(x => x.Split("=")[0], x => new StringValues(x.Split("=")[1])));
 
-        public interface ITestQueryModel
-        {
-            public string Name { get; set; }
-            public int Age { get; set; }
-            public bool IsActive { get; set; }
-            public TestRole Role { get; set; }
-        }
-
-        public enum TestRole { User, Contributor, Maintainer, Owner }
     }
 }

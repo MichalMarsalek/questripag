@@ -25,6 +25,9 @@ public static class ExpressionExtensions
     public static LambdaExpression And(this LambdaExpression left, LambdaExpression right)
         => Expression.Lambda(Expression.AndAlso(left.Body, right.Body.Substitute(right.Parameters[0], left.Parameters[0])), left.Parameters[0]);
 
+    public static Expression<TDelegate> Cast<TDelegate>(this LambdaExpression expr)
+        => Expression.Lambda<TDelegate>(expr.Body, expr.Parameters);
+
     private class ParameterReplacementExpressionVisitor : ExpressionVisitor
     {
         public ParameterExpression target { get; private set; }

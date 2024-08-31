@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Questripag;
 
@@ -14,12 +8,12 @@ public class Queryer
     {
         foreach(var filter in filtering.Filters)
         {
-            source = Filter<TSource, TQuery>(source, filter);
+            source = source.Where(GetFilterPredicate<TSource, TQuery>(filter));
         }
         return source;
     }
 
-    public IQueryable<TSource> Filter<TSource, TQuery>(IQueryable<TSource> source, FilterCoordinate<object> filter)
+    public Expression<Func<TSource, bool>> GetFilterPredicate<TSource, TQuery>(FilterCoordinate<dynamic> filter)
     {
         // TODO Support custom prop expressions instead of calling `GetDefaultPropExpression`
         var propExpr = GetDefaultPropExpression<TSource>(filter.Key);
@@ -29,7 +23,7 @@ public class Queryer
         {
             throw new NotImplementedException();
         }
-        Expression<Func<dynamic, bool>> filterPredicate;
+        LambdaExpression filterPredicate;
 
         var y = Expression.Parameter(propType, "y");
 
@@ -45,10 +39,10 @@ public class Queryer
         var scalarValue = ((ScalarFilterValue<object>)values.First()).Value;
 
         var equalsMethod = propType.GetMethod("Equals", [typeof(object)]);
-        filterPredicate = (Expression.Lambda(Expression.Call(Expression.Constant(scalarValue), equalsMethod, Expression.Convert(y, typeof(object))), y) as Expression<Func<dynamic, bool>>)!;
+        filterPredicate = Expression.Lambda(Expression.Call(Expression.Constant(scalarValue), equalsMethod, Expression.Convert(y, typeof(object))), y);
         // filterPredicate = y => y.Equals((object)dynamicValue)
 
-        return source.Where(filterPredicate.ComposeByInlining(propExpr));
+        return (Expression<Func<TSource, bool>>)filterPredicate.ComposeByInlining(propExpr);
     }
 
 
@@ -58,11 +52,11 @@ public class Queryer
         var order = ordering.Orders.ToList();
         if (order.Any())
         {
-            var expr0 = GetDefaultPropExpression<TSource>(order[0].Key);
+            var expr0 = (Expression<Func<TSource, object>>)GetDefaultPropExpression<TSource>(order[0].Key);
             var ordered = order[0].IsDescending ? source.OrderByDescending(expr0) : source.OrderBy(expr0);
             foreach (var o in order.Skip(1))
             {
-                var expr = GetDefaultPropExpression<TSource>(order[0].Key);
+                var expr = (Expression<Func<TSource, object>>)GetDefaultPropExpression<TSource>(order[0].Key);
                 ordered = o.IsDescending ? ordered.ThenByDescending(expr) : ordered.ThenBy(expr);
             }
             return ordered;
@@ -70,9 +64,9 @@ public class Queryer
         return source;
     }
 
-    private Expression<Func<TSource, dynamic>> GetDefaultPropExpression<TSource>(string propName)
+    private LambdaExpression GetDefaultPropExpression<TSource>(string propName)
     {
         var param = Expression.Parameter(typeof(TSource), "x");
-        return Expression.Lambda<Func<TSource, dynamic>>(Expression.Property(param, propName), param);
+        return Expression.Lambda(Expression.Property(param, propName), param);
     }
 }
