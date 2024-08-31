@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./dotnet
+        working-directory: ./dotnet/Questripag
 
     steps:
     - uses: actions/checkout@v4
