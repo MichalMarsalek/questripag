@@ -10,7 +10,7 @@ namespace Questripag.Tests
     {
         [Theory]
         [MemberData(nameof(GetQueryCollectionToQueryData))]
-        public void QueryCollectionToQuery_ReturnsRawQuery(string inputQueryString, Query<ITestQueryModel> expectedRawQuery)
+        public void BinderQueryCollectionToQuery_ReturnsRawQuery(string inputQueryString, Query<ITestQueryModel> expectedRawQuery)
         {
             var binder = new Binder<ITestQueryModel>();
             var input = ParseQueryCollection(inputQueryString);

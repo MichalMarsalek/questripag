@@ -7,7 +7,7 @@ namespace Questripag.Tests
     {
         [Theory]
         [MemberData(nameof(GetGetFilterPredicateTestCases))]
-        public void GetFilterPredicate_ReturnsPredicate(FilterCoordinate<dynamic> inputFilter, LambdaExpression expectedPredicate)
+        public void QueryerGetFilterPredicate_ReturnsPredicate(FilterCoordinate<dynamic> inputFilter, LambdaExpression expectedPredicate)
         {
             var queryer = new Queryer();
             var result = queryer.GetFilterPredicate<ITestQueryModel, ITestQueryModel>(inputFilter);
