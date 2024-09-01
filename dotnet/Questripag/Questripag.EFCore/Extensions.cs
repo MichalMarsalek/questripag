@@ -12,7 +12,7 @@ namespace Questripag.EFCore
             return new(items, totalItemsCount);
         }
 
-        public async static Task<Page<TTarget>> Query<TSource, TQuery, TTarget>(this Queryer queryer, IQueryable<TSource> source, Expression<Func<TSource, TTarget>> projection, Query<TQuery> query, CancellationToken cancellationToken)
+        public async static Task<Page<TTarget>> Query<TSource, TQuery, TTarget>(this IQueryer queryer, IQueryable<TSource> source, Expression<Func<TSource, TTarget>> projection, Query<TQuery> query, CancellationToken cancellationToken)
             => await source.Filter(queryer, query).Order(queryer, query).Select(projection).ToPageAsync(query, cancellationToken);
     }
 }

@@ -5,11 +5,10 @@ namespace Questripag;
 public interface IQueryer
 {
     public IQueryable<TSource> Filter<TSource, TQuery>(IQueryable<TSource> source, IFiltering<TQuery> filtering);
-    public Expression<Func<TSource, bool>> GetFilterPredicate<TSource, TQuery>(FilterCoordinate<dynamic> filter);
     public IQueryable<TSource> Order<TSource, TQuery>(IQueryable<TSource> source, IOrdering<TQuery> ordering);
 }
 
-public class Queryer : IQueryer
+internal class Queryer : IQueryer
 {
     public IQueryable<TSource> Filter<TSource, TQuery>(IQueryable<TSource> source, IFiltering<TQuery> filtering)
     {

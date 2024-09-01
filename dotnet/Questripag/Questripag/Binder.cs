@@ -30,7 +30,7 @@ namespace Questripag
     public class Binder<TQueryModel>(BinderProvider binderProvider) : IModelBinder
     {
         private readonly BinderProvider _binderProvider = binderProvider;
-        public Query<TQueryModel> QueryCollectionToQuery(IQueryCollection queryString)
+        internal Query<TQueryModel> QueryCollectionToQuery(IQueryCollection queryString)
             => RawQueryToQuery(QueryStringToRawQuery(queryString));
 
         private RawQuery QueryStringToRawQuery(IQueryCollection queryString)
