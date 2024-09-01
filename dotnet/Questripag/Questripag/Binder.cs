@@ -74,11 +74,12 @@ namespace Questripag
         {   // TODO Respect attributes for ignoring filter/order on specific prop
 
             var type = typeof(TQueryModel);
-            var props = type.GetProperties();
+            var filterProps = type.GetProperties().Where(x => x.IsFilterProp());
+            var orderProps = type.GetProperties().Where(x => x.IsOrderProp());
             return new Query<TQueryModel>(
                 rawQuery.Page,
                 rawQuery.PageSize,
-                props.Select(prop =>
+                filterProps.Select(prop =>
                 {
                     var propType = prop.PropertyType;
                     var rawValues = rawQuery.Filters.FirstOrDefault(x => x.Key.Equals(prop.Name, StringComparison.InvariantCultureIgnoreCase))?.Value;
@@ -103,7 +104,7 @@ namespace Questripag
 
                 }).Where(x => x != null)!,
                 rawQuery.Orders.Select(x => new OrderCoordinate(
-                    props.FirstOrDefault(prop => x.Key.Equals(prop.Name, StringComparison.InvariantCultureIgnoreCase))?.Name,
+                    orderProps.FirstOrDefault(prop => x.Key.Equals(prop.Name, StringComparison.InvariantCultureIgnoreCase))?.Name,
                     x.IsDescending)
                 ).Where(x => x.Key != null)
             );

@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Questripag.Generator.Js\Questripag.Generator.Js.csproj" />
     <ProjectReference Include="..\Questripag\Questripag.csproj" />
   </ItemGroup>
 
