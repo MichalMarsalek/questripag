@@ -10,19 +10,20 @@ public class GeneratorTests
 {
     private string RemoveWhitespace(string text) => Regex.Replace(text, @"\s", "");
 
-    [Theory]
-    [MemberData(nameof(GetGetFilterPredicateTestCases))]
-    public void GeneratorGenerate_GeneratesConfig(IEnumerable<MethodInfo> inputMethods, string expectedOutputCode)
+    [Theory(DisplayName = "")]
+    [MemberData(nameof(GetGetFilterPredicateKeys))]
+    public void GeneratorGenerate_GeneratesConfig(string key)
     {
+        var testCase = GetGetFilterPredicateTestCases()[key];
         var generator = new Generator.Js.Generator(false);
-        var result = generator.Generate(inputMethods);
-        RemoveWhitespace(result.ToString()).Should().EndWithEquivalentOf(RemoveWhitespace(expectedOutputCode) + ";");
+        var result = generator.Generate(testCase.Input);
+        RemoveWhitespace(result.ToString()).Should().EndWithEquivalentOf(RemoveWhitespace(testCase.Output) + ";");
     }
 
-    public static IEnumerable<object[]> GetGetFilterPredicateTestCases()
+    public static Dictionary<string, TestCase<IEnumerable<MethodInfo>, string>> GetGetFilterPredicateTestCases()
     {
-        return [
-            [typeof(TestController1).GetMethods(), """
+        var cases = new List<TestCase<IEnumerable<MethodInfo>, string>>() {
+            new(typeof(TestController1).GetMethods(), """
                 {
                     TestEndpoint: {
                         Name: {response: true, filter: false, order: true, type: "String"},
@@ -35,8 +36,8 @@ public class GeneratorTests
                         "Nested.Property": {response: false, filter: true, order: true, type: "String"}
                     }
                 }
-            """],
-            [typeof(TestController2).GetMethods(), """
+            """),
+            new(typeof(TestController2).GetMethods(), """
                 {
                     TestEndpoint1: {
                         Name: {response: false, filter: true, order: true, type: "String"}
@@ -48,9 +49,11 @@ public class GeneratorTests
                         Name: {response: true, filter: false, order: false, type: "String"}
                     }
                 }
-            """],
-        ];
+            """),
+        };
+        return cases.ToDictionary(x => x.Input.First().DeclaringType!.Name, x => x);
     }
+    public static IEnumerable<object[]> GetGetFilterPredicateKeys => GetGetFilterPredicateTestCases().Keys.Select(x => new object[] { x });
 
     public class TestController1
     {

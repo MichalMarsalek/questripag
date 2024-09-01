@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Questripag
 {
-    public class BinderProvider : IModelBinderProvider
+    public class QueryBinderProvider : IModelBinderProvider
     {
         public Func<int> DefaultPage { get; set; } = () => 1;
         public Func<int> DefaultPageSize { get; set; } = () => 10;
@@ -27,9 +27,9 @@ namespace Questripag
         }
     }
 
-    public class Binder<TQueryModel>(BinderProvider binderProvider) : IModelBinder
+    public class QueryBinder<TQueryModel>(QueryBinderProvider binderProvider) : IModelBinder
     {
-        private readonly BinderProvider _binderProvider = binderProvider;
+        private readonly QueryBinderProvider _binderProvider = binderProvider;
         internal Query<TQueryModel> QueryCollectionToQuery(IQueryCollection queryString)
             => RawQueryToQuery(QueryStringToRawQuery(queryString));
 
