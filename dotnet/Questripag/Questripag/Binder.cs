@@ -71,8 +71,7 @@ namespace Questripag
         }
 
         private Query<TQueryModel> RawQueryToQuery(RawQuery rawQuery)
-        {   // TODO Respect attributes for ignoring filter/order on specific prop
-
+        {
             var type = typeof(TQueryModel);
             var filterProps = type.GetProperties().Where(x => x.IsFilterProp());
             var orderProps = type.GetProperties().Where(x => x.IsOrderProp());
