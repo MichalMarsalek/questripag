@@ -67,6 +67,11 @@ public class Queryer
     private LambdaExpression GetDefaultPropExpression<TSource>(string propName)
     {
         var param = Expression.Parameter(typeof(TSource), "x");
-        return Expression.Lambda(Expression.Property(param, propName), param);
+        Expression body = param;
+        foreach(var part in propName.Split("."))
+        {
+            body = Expression.Property(body, part);
+        }
+        return Expression.Lambda(body, param);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
@@ -18,6 +19,7 @@ public class Generator
 
     public string Generate(IEnumerable<MethodInfo> methods)
     {
+        var asConst = GenerateTs ? " as const" : "";
         return $"""
             /* tslint:disable */
             /* eslint-disable */
@@ -26,9 +28,15 @@ public class Generator
             //     Generated using Questripag.Generator.Js
             // </auto-generated>
             //----------------------      
-                
-            export const endpoints = {GenerateData(methods)}{(GenerateTs ? " as const" : "")};
+            
+            export const dataTypes = {GenerateDataTypes()}{asConst};
+            export const endpoints = {GenerateData(methods)}{asConst};
             """;
+    }
+
+    private string GenerateDataTypes()
+    {
+        return $"[{string.Join(", ", Enum.GetValues<PropertyType>().Select(x => $"\"{x}\""))}]";
     }
 
     private Type? GetGenericDefinitionOrNull(Type type)
@@ -91,7 +99,7 @@ public class Generator
             {
                 foreach(var prop in responseType.GetProperties())
                 {
-                    propertiesDict[prop.Name] = new PropertyConfig {Response = true};
+                    propertiesDict[prop.SerializationName()] = new PropertyConfig {Response = true, ClrType = prop.PropertyType};
                 }
             }
             var requestType = method.GetParameters().Select(x => UnwrapQueryArgument(x.ParameterType)).FirstOrDefault(x => x != null);
@@ -99,10 +107,10 @@ public class Generator
             {
                 foreach (var prop in requestType.GetProperties())
                 {
-                    var config = propertiesDict.GetValueOrDefault(prop.Name, new());
+                    var config = propertiesDict.GetValueOrDefault(prop.SerializationName(), new() { ClrType = prop.PropertyType });
                     config.Filter = prop.IsFilterProp();
                     config.Order = prop.IsOrderProp();
-                    propertiesDict[prop.Name] = config;
+                    propertiesDict[prop.SerializationName()] = config;
                 }
             }
             propertiesDict = new Dictionary<string, PropertyConfig>(propertiesDict.Where(x => x.Value.Response || x.Value.Order || x.Value.Filter));
@@ -114,7 +122,7 @@ public class Generator
         var result = JsonSerializer.Serialize(methodsDict, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
+            WriteIndented = true,
         });
         return Regex.Replace(result, "\"([\\$\\w]+)\":", "$1:");
     }

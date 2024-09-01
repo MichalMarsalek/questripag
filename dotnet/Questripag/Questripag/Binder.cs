@@ -47,9 +47,20 @@ namespace Questripag
         private RawQuery QueryStringToRawQuery(IQueryCollection queryString)
         {
             var rawPage = queryString["page"].FirstOrDefault("")!;
-            var pageMatch = new Regex(@"^(\d+)@(\d+)$").Match(rawPage);
-            int page = pageMatch.Success ? int.Parse(pageMatch.Groups[1].Value) : BinderConfiguration.DefaultPage();
-            int pageSize = pageMatch.Success ? int.Parse(pageMatch.Groups[2].Value) : BinderConfiguration.DefaultPageSize();
+            int page;
+            int pageSize;
+            var pageMatch = new Regex(@"^(\d+)$").Match(rawPage);
+            if (pageMatch.Success)
+            {
+                page = int.Parse(pageMatch.Groups[1].Value);
+                pageSize = BinderConfiguration.DefaultPageSize();
+            }
+            else
+            {
+                var pageOptionsMatch = new Regex(@"^(\d+)@(\d+)$").Match(rawPage);
+                page = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[1].Value) : BinderConfiguration.DefaultPage();
+                pageSize = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[2].Value) : BinderConfiguration.DefaultPageSize();
+            }
             var rawOrder = queryString["order"].FirstOrDefault("")!;
             var orderMatch = new Regex(@"^([\-\+\s][a-zA-Z]+(?:\.[a-zA-Z]+)*)*$").Match(rawOrder);
             var order = orderMatch.Success
@@ -82,7 +93,7 @@ namespace Questripag
                 filterProps.Select(prop =>
                 {
                     var propType = prop.PropertyType;
-                    var rawValues = rawQuery.Filters.FirstOrDefault(x => x.Key.Equals(prop.Name, StringComparison.InvariantCultureIgnoreCase))?.Value;
+                    var rawValues = rawQuery.Filters.FirstOrDefault(x => x.Key.Equals(prop.SerializationName(), StringComparison.InvariantCultureIgnoreCase))?.Value;
                     var values = new List<FilterValue<object>>();
                     if (rawValues != null) {
                         foreach (var rawValue in rawValues) {
@@ -100,11 +111,11 @@ namespace Questripag
                             catch { }
                         }
                     }
-                    return values.Count < 1 ? null : new FilterCoordinate<dynamic>(prop.Name, values);
+                    return values.Count < 1 ? null : new FilterCoordinate<dynamic>(prop.SerializationName(), values);
 
                 }).Where(x => x != null)!,
                 rawQuery.Orders.Select(x => new OrderCoordinate(
-                    orderProps.FirstOrDefault(prop => x.Key.Equals(prop.Name, StringComparison.InvariantCultureIgnoreCase))?.Name,
+                    orderProps.FirstOrDefault(prop => x.Key.Equals(prop.SerializationName(), StringComparison.InvariantCultureIgnoreCase))?.SerializationName(),
                     x.IsDescending)
                 ).Where(x => x.Key != null)
             );

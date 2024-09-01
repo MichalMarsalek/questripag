@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Questripag;
 
@@ -8,4 +10,9 @@ public static class PropertyInfoExtensions
         => !prop.GetCustomAttributes<NoFilterAttribute>().Any();
     public static bool IsOrderProp(this PropertyInfo prop)
         => !prop.GetCustomAttributes<NoOrderAttribute>().Any();
+    public static string SerializationName(this PropertyInfo prop)
+    {
+        var nameAttribute = prop.GetCustomAttributes<JsonPropertyNameAttribute>().FirstOrDefault();
+        return nameAttribute?.Name ?? Regex.Replace(prop.Name, @"(?=\w)_(?=\w)", ".");
+    }
 }
