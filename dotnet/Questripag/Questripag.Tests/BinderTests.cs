@@ -29,6 +29,10 @@ public class BinderTests
                 new(1, 10, [], [])
             ),
             new(
+                "page=1@10&order=name&order=-age",
+                new(1, 10, [], [Order("Name", false), Order("Age", true)])
+            ),
+            new(
                 "page=2@50&order=+name&age=18..65&isActive=true&role=Maintainer",
                 new(2, 50, [Filter("Age", Range(18, 65)), Filter("isActive", Scalar(true)), Filter("Role", Scalar(TestRole.Maintainer))], [Order("Name", false)])
             ),
@@ -39,6 +43,6 @@ public class BinderTests
     public static IEnumerable<object[]> GetQueryCollectionToQueryKeys => GetQueryCollectionToQueryTestCases().Keys.Select(x => new object[] { x });
 
     private IQueryCollection ParseQueryCollection(string queryString)
-        => new QueryCollection(queryString.Split("&").ToDictionary(x => x.Split("=")[0], x => new StringValues(x.Split("=")[1])));
+        => new QueryCollection(queryString.Split("&").Select(x => x.Split("=")).GroupBy(x => x[0]).ToDictionary(x => x.Key, x => new StringValues(x.Select(x => x[1]).ToArray())));
 
 }

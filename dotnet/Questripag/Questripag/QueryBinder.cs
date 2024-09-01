@@ -50,7 +50,7 @@ namespace Questripag
                 page = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[1].Value) : _binderProvider.DefaultPage();
                 pageSize = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[2].Value) : _binderProvider.DefaultPageSize();
             }
-            var rawOrder = queryString["order"].FirstOrDefault("")!;
+            var rawOrder = string.Join("", queryString["order"].Where(x => x != "").Select(x => x.StartsWith("+") || x.StartsWith("-") ? x : "+" + x));
             var orderMatch = new Regex(@"^([\-\+\s][a-zA-Z]+(?:\.[a-zA-Z]+)*)*$").Match(rawOrder);
             var order = orderMatch.Success
                 ? orderMatch.Groups[1].Captures.Select(x => x.Value).Select(o => new OrderCoordinate(o.Substring(1), o.StartsWith('-')))

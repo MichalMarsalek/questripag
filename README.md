@@ -62,11 +62,11 @@ public enum MovieCategory {Comedy, Scifi, Thriller, Romantic}
 This is a very minimal setup. The type argument of `Query` defines which properties are available for filtering and sorting. By default each property is avaialble for both, but this can be configured with attributes. By default, each filter / order operation is applied to the source data type (in this case `MovieEntity`), that's why the source data should implement the query options interface. Instead of the default mapping of the query prop to the source prop of the same name, each query prop can have a custom behaviour defined.
 
 ## Available operations
-The result can be ordered by several properties, each in ascending or descending order. As an example, `order=-released+name` orders first by latest release date, then alphabetically.
+The result can be ordered by a property such as `order=count` or as descending with `order=-count`. Ordering by multiple coordinates is supported by either repeating `order`, such as `order=-released&order=name` or by simply concatenating the selectors, such as `order=-released+name`.
 For each property, the query can restrict the result to the items for which the property admits a certain value or values. Ranges are supported by delimiting the bounds with `..`. Any bound can be ommited. Multiple values are supported by delimiting with `|`. Verbatim `..`/`|`/`\` are to be escaped using `\`. As an example, `released=2023-01-01..2023-12-31` restricts to 2023 movies, while `category=romantic|comedy` restricts to romantic or comedy movies.
 Both scalar and collection data are supported in the source.
 
-To disable filtering or ordering using a certaing prop, use the `NoFilter` or `NoOrder` attribute.
+To disable filtering or ordering using a certain prop, use the `NoFilter` or `NoOrder` attribute.
 
 ### Nested fields
 Filtering/ordering by nested fields is supported by default. To allow a filter like `nested.property=4`, create a `public int Nested_Property {get;set;}` property on your query options interface.
