@@ -13,7 +13,7 @@ builder.Services
     .AddControllers(options => options.AddQueryBinder());
 
 [Route("movie"), ApiController]
-public class MovieController(DbContext dbContext, Queryer queryer)
+public class MovieController(DbContext dbContext, Queryer queryer): ControllerBase
 {
   private DbContext _dbContext = dbContext;
   private Queryer _queryer = queryer;
@@ -32,10 +32,10 @@ public class MovieController(DbContext dbContext, Queryer queryer)
 
 // Definition of the properties available for filtering/ordering
 public interface IMovieQueryOptions {
-  public string Name {get;}
-  public DateOnly Released {get;}
-  public double Rating {get;}
-  public MovieCategory Category {get;}
+  public string Name {get;set;}
+  public DateOnly Released {get;set;}
+  public double Rating {get;set;}
+  public MovieCategory Category {get;set;}
 }
 
 // Source data
@@ -48,10 +48,10 @@ public class MovieEntity: IMovieQueryOptions {
 
 // Response data
 public class MovieDto {
-  public string Name {get;}
-  public DateOnly Released {get;}
-  public double Rating {get;}
-  public MovieCategory Category {get;}
+  public string Name {get;set;}
+  public DateOnly Released {get;set;}
+  public double Rating {get;set;}
+  public MovieCategory Category {get;set;}
 }
 
 public enum MovieCategory {Comedy, Scifi, Thriller, Romantic}
@@ -62,14 +62,18 @@ public enum MovieCategory {Comedy, Scifi, Thriller, Romantic}
 This is a very minimal setup. The type argument of `Query` defines which properties are available for filtering and sorting. By default each property is avaialble for both, but this can be configured with attributes. By default, each filter / order operation is applied to the source data type (in this case `MovieEntity`), that's why the source data should implement the query options interface. Instead of the default mapping of the query prop to the source prop of the same name, each query prop can have a custom behaviour defined.
 
 ## Available operations
+The page is 1-indexed and is specified like `page=2`, or `page2@50` which also specifies the page size.
 The result can be ordered by a property such as `order=count` or as descending with `order=-count`. Ordering by multiple coordinates is supported by either repeating `order`, such as `order=-released&order=name` or by simply concatenating the selectors, such as `order=-released+name`.
 For each property, the query can restrict the result to the items for which the property admits a certain value or values. Ranges are supported by delimiting the bounds with `..`. Any bound can be ommited. Multiple values are supported by delimiting with `|`. Verbatim `..`/`|`/`\` are to be escaped using `\`. As an example, `released=2023-01-01..2023-12-31` restricts to 2023 movies, while `category=romantic|comedy` restricts to romantic or comedy movies.
 Both scalar and collection data are supported in the source.
 
 To disable filtering or ordering using a certain prop, use the `NoFilter` or `NoOrder` attribute.
 
+### Renaming the fields
+`JsonPropertyName` is respected.
+
 ### Nested fields
-Filtering/ordering by nested fields is supported by default. To allow a filter like `nested.property=4`, create a `public int Nested_Property {get;set;}` property on your query options interface.
+Filtering/ordering by nested fields is supported by default. To allow a filter like `nested.property=4`, create a `public int Nested_Property {get;set;}` property on your query options interface or use `[JsonPropertyName("nested.property")]` attribute.
 
 ### Custom filtering/ordering
 In certain situations, the default generated `Expression`s can either be undesirable or untranslatable by EF. In these cases you can specify a custom behaviour of each prop in the context of filtering and ordering. (TODO)
