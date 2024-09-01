@@ -11,7 +11,7 @@ public class BinderTests
     [MemberData(nameof(GetQueryCollectionToQueryData))]
     public void BinderQueryCollectionToQuery_ReturnsRawQuery(string inputQueryString, Query<ITestQueryModel> expectedRawQuery)
     {
-        var binder = new Binder<ITestQueryModel>();
+        var binder = new Binder<ITestQueryModel>(new BinderProvider());
         var input = ParseQueryCollection(inputQueryString);
         binder.QueryCollectionToQuery(input).Should().BeEquivalentTo(expectedRawQuery);
     }

@@ -8,13 +8,17 @@ A request for the top 50 best rated comedy or romantic movies released in the ye
 Let's see how you would satisfy such request using this library & EFCore.
 
 ```cs
+builder.Services
+    .AddQueryer()
+    .AddControllers(options => options.AddQueryBinder());
+
 [Route("movie"), ApiController]
 public class MovieController(DbContext dbContext, Queryer queryer)
 {
   private DbContext _dbContext = dbContext;
   private Queryer _queryer = queryer;
 
-  private Expression<Func<MovieEntity, MovieDto>> = x => new MovieDto {
+  private Expression<Func<MovieEntity, MovieDto>> _projection = x => new MovieDto {
     Name = x.Name,
     Released = x.Released,
     Rating = x.Rating
@@ -62,10 +66,21 @@ The result can be ordered by several properties, each in ascending or descending
 For each property, the query can restrict the result to the items for which the property admits a certain value or values. Ranges are supported by delimiting the bounds with `..`. Any bound can be ommited. Multiple values are supported by delimiting with `|`. Verbatim `..`/`|`/`\` are to be escaped using `\`. As an example, `released=2023-01-01..2023-12-31` restricts to 2023 movies, while `category=romantic|comedy` restricts to romantic or comedy movies.
 Both scalar and collection data are supported in the source.
 
+To disable filtering or ordering using a certaing prop, use the `NoFilter` or `NoOrder` attribute.
+
+### Nested fields
+Filtering/ordering by nested fields is supported by default. To allow a filter like `nested.property=4`, create a `public int Nested_Property {get;set;}` property on your query options interface.
+
+### Custom filtering/ordering
+In certain situations, the default generated `Expression`s can either be undesirable or untranslatable by EF. In these cases you can specify a custom behaviour of each prop in the context of filtering and ordering. (TODO)
+
+### Type safety with nested & custom properties
+Due to the nominal nature of C#'s type system, it is impossible to validate a correspondence between the source data type and the query options interface for nested props, let alone for props that have a custom filter/order behaviour defined. Therefore, in these cases we recommend having a base interface for the basic non-nested default behaving props that the source data type is validated against and then an inherited interface that's used as the actual type parameter of `Query`.
+
 ## Nswag support
 This library customizes (TODO) the openAPI generation for the `Query<T>` type.
 
 ## Typescript support
-This library includes (TODO) two features helping integrating the rest APIs created using this library using a javascript frontend.
-1. Functions for (de)serializing a query request to/from a query string.
+This library includes two features helping integrating the rest APIs created using this library using a javascript frontend.
+1. Functions for (de)serializing a query request to/from a query string. (TODO)
 2. Javascript generator exposing the endpoints configuration, meaning which properties are available for filtering & ordering. This is useful when building a generic Table view. The table needs to know which columns to offer for filtering/orderign to the user.

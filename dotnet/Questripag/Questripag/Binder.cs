@@ -1,28 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Questripag
 {
-    public static class BinderConfiguration
-    {
-        public static Func<int> DefaultPage { get; set; } = () => 1;
-        public static Func<int> DefaultPageSize { get; set; } = () => 10;
-        public static Func<IEnumerable<OrderCoordinate>> DefaultOrder { get; set; } = () => [];
-    }
-
     public class BinderProvider : IModelBinderProvider
     {
+        public Func<int> DefaultPage { get; set; } = () => 1;
+        public Func<int> DefaultPageSize { get; set; } = () => 10;
+        public Func<IEnumerable<OrderCoordinate>> DefaultOrder { get; set; } = () => [];
+
         private IModelBinder? GetBinder(Type modelType)
         {
             if (!modelType.IsGenericType || modelType.GetGenericTypeDefinition() != typeof(Query<>))
@@ -30,7 +18,7 @@ namespace Questripag
 
             Type[] types = modelType.GetGenericArguments();
             Type o = typeof(Query<>).MakeGenericType(types);
-            return (IModelBinder)Activator.CreateInstance(o)!;
+            return (IModelBinder)Activator.CreateInstance(o, this)!;
         }
 
         public IModelBinder? GetBinder(ModelBinderProviderContext context)
@@ -39,8 +27,9 @@ namespace Questripag
         }
     }
 
-    public class Binder<TQueryModel> : IModelBinder
+    public class Binder<TQueryModel>(BinderProvider binderProvider) : IModelBinder
     {
+        private readonly BinderProvider _binderProvider = binderProvider;
         public Query<TQueryModel> QueryCollectionToQuery(IQueryCollection queryString)
             => RawQueryToQuery(QueryStringToRawQuery(queryString));
 
@@ -53,19 +42,19 @@ namespace Questripag
             if (pageMatch.Success)
             {
                 page = int.Parse(pageMatch.Groups[1].Value);
-                pageSize = BinderConfiguration.DefaultPageSize();
+                pageSize = _binderProvider.DefaultPageSize();
             }
             else
             {
                 var pageOptionsMatch = new Regex(@"^(\d+)@(\d+)$").Match(rawPage);
-                page = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[1].Value) : BinderConfiguration.DefaultPage();
-                pageSize = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[2].Value) : BinderConfiguration.DefaultPageSize();
+                page = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[1].Value) : _binderProvider.DefaultPage();
+                pageSize = pageOptionsMatch.Success ? int.Parse(pageOptionsMatch.Groups[2].Value) : _binderProvider.DefaultPageSize();
             }
             var rawOrder = queryString["order"].FirstOrDefault("")!;
             var orderMatch = new Regex(@"^([\-\+\s][a-zA-Z]+(?:\.[a-zA-Z]+)*)*$").Match(rawOrder);
             var order = orderMatch.Success
                 ? orderMatch.Groups[1].Captures.Select(x => x.Value).Select(o => new OrderCoordinate(o.Substring(1), o.StartsWith('-')))
-                : BinderConfiguration.DefaultOrder();
+                : _binderProvider.DefaultOrder();
             var filter = queryString.Where(x => x.Key != "page" && x.Key != "order" && x.Value.FirstOrDefault() != null)
                 .Select(x => ParseRawFilterCoordinate(x.Key, x.Value.First()));
             return new(page, pageSize, filter, order);
