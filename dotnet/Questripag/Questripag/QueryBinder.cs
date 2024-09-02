@@ -119,6 +119,14 @@ namespace Questripag
                 {
                     return rawValue;
                 }
+                else if (type == typeof(int))
+                {
+                    return int.Parse(rawValue);
+                }
+                else if (type == typeof(double))
+                {
+                    return double.Parse(rawValue);
+                }
                 else if (type == typeof(bool))
                 {
                     if (rawValue == "0" || rawValue.Equals("false", StringComparison.InvariantCultureIgnoreCase)) return false;
