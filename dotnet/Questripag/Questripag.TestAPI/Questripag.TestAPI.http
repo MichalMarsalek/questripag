@@ -1,0 +1,6 @@
+@Questripag.TestAPI_HostAddress = http://localhost:5244
+
+GET {{Questripag.TestAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

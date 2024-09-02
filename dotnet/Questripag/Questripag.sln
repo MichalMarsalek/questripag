@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Questripag.EFCore", "Questr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Questripag.Tests", "Questripag.Tests\Questripag.Tests.csproj", "{46C85C0C-2FF4-465B-B7B9-B50648A4287B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questripag.Generator.Js", "Questripag.Generator.Js\Questripag.Generator.Js.csproj", "{1BAC4A67-641E-469E-8F49-7D7890AF4173}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Questripag.Generator.Js", "Questripag.Generator.Js\Questripag.Generator.Js.csproj", "{1BAC4A67-641E-469E-8F49-7D7890AF4173}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questripag.TestAPI", "Questripag.TestAPI\Questripag.TestAPI.csproj", "{3B3A24FF-B5A9-40F9-93DD-B5718A13F22C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1BAC4A67-641E-469E-8F49-7D7890AF4173}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BAC4A67-641E-469E-8F49-7D7890AF4173}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BAC4A67-641E-469E-8F49-7D7890AF4173}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B3A24FF-B5A9-40F9-93DD-B5718A13F22C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B3A24FF-B5A9-40F9-93DD-B5718A13F22C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B3A24FF-B5A9-40F9-93DD-B5718A13F22C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B3A24FF-B5A9-40F9-93DD-B5718A13F22C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
