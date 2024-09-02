@@ -17,7 +17,6 @@ public class BinderTests
         binder.QueryCollectionToQuery(input).Should().BeEquivalentTo(testCase.Output);
     }
     public static FilterCoordinate<object> Filter(string key, params FilterValue<object>[] values) => new(key, values);
-    public static FilterValue<object> Scalar(object value) => new ScalarFilterValue<object>(value);
     public static FilterValue<object> Range(object lower, object upper) => new RangeFilterValue<object>(lower, upper);
     public static OrderCoordinate Order(string key, bool isDescending) => new(key, isDescending);
 
@@ -33,7 +32,7 @@ public class BinderTests
             ),
             new(
                 "page=2@50&order=+name&age=18..65&isActive=true&role=Maintainer",
-                new(2, 50, [Filter("Age", Range(18, 65)), Filter("isActive", Scalar(true)), Filter("Role", Scalar(TestRole.Maintainer))], [Order("Name", false)])
+                new(2, 50, [Filter("Age", Range(18, 65)), Filter("isActive", true), Filter("Role", TestRole.Maintainer)], [Order("Name", false)])
             ),
         }.ToDictionary(x => x.Input, x => x);
 

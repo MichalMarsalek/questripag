@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Runtime.Serialization;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Questripag
@@ -10,6 +11,7 @@ namespace Questripag
         public Func<int> DefaultPage { get; set; } = () => 1;
         public Func<int> DefaultPageSize { get; set; } = () => 10;
         public Func<IEnumerable<OrderCoordinate>> DefaultOrder { get; set; } = () => [];
+        public JsonSerializerOptions JsonSerializerOptions { get; set; } = new();
 
         private IModelBinder? GetBinder(Type modelType)
         {
@@ -111,23 +113,11 @@ namespace Questripag
 
         private dynamic ParseRawValue(string rawValue, Type type)
         {
-            // TODO Add more types
-            // TODO Add support for custom types & custom parsing
             try
             {
                 if (type == typeof(string))
                 {
                     return rawValue;
-                }
-                if (type == typeof(Guid))
-                {
-                    return Guid.Parse(rawValue);
-                }
-                else if (type == typeof(bool))
-                {
-                    if (rawValue == "0" || rawValue == "false") return false;
-                    if (rawValue == "1" || rawValue == "true") return true;
-                    throw new SerializationException();
                 }
                 else if (type == typeof(int))
                 {
@@ -137,28 +127,17 @@ namespace Questripag
                 {
                     return double.Parse(rawValue);
                 }
-                else if (type == typeof(DateTime))
+                else if (type == typeof(bool))
                 {
-                    return DateTime.Parse(rawValue);
-                }
-                else if (type == typeof(DateTimeOffset))
-                {
-                    return DateTimeOffset.Parse(rawValue);
-                }
-                else if (type == typeof(DateOnly))
-                {
-                    return DateOnly.Parse(rawValue);
-                }
-                else if (type == typeof(TimeOnly))
-                {
-                    return TimeOnly.Parse(rawValue);
+                    if (rawValue == "0" || rawValue.Equals("false", StringComparison.InvariantCultureIgnoreCase)) return false;
+                    if (rawValue == "1" || rawValue.Equals("true", StringComparison.InvariantCultureIgnoreCase)) return true;
                 }
                 else if (type.IsEnum)
                 {
                     return int.TryParse(rawValue, out int result) && type.IsEnumDefined(result) ? Enum.ToObject(type, result)
                         : type.IsEnumDefined(rawValue) ? Enum.Parse(type, rawValue) : throw new SerializationException();
                 }
-                throw new SerializationException($"Unable to parse {rawValue} as {type}.");
+                return JsonSerializer.Deserialize(JsonSerializer.Serialize(rawValue), type, _binderProvider.JsonSerializerOptions)!;
             }
             catch(Exception ex)
             {
