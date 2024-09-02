@@ -7,7 +7,7 @@ namespace Questripag.TestAPI.Controllers
     public class TestController : ControllerBase
     {
         [HttpGet]
-        public int Get(Query<IQueryOptions> query)
+        public int Get(Query<IQueryOptions> query, [FromQuery] int manualQueryParam)
         {
             throw new NotImplementedException();
         }

@@ -13,6 +13,11 @@ public static class PropertyInfoExtensions
     public static string SerializationName(this PropertyInfo prop)
     {
         var nameAttribute = prop.GetCustomAttributes<JsonPropertyNameAttribute>().FirstOrDefault();
-        return nameAttribute?.Name ?? Regex.Replace(prop.Name, @"(?=\w)_(?=\w)", ".");
+        return nameAttribute?.Name ?? Uncapitalize(Regex.Replace(prop.Name, @"(?=\w)_(?=\w)", "."));
+    }
+
+    private static string Uncapitalize(this string value)
+    {
+        return value.Length < 1 ? value : value[0].ToString().ToLowerInvariant() + value[1..];
     }
 }

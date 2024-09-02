@@ -39,62 +39,13 @@ public class Generator
         return $"[{string.Join(", ", Enum.GetValues<PropertyType>().Select(x => $"\"{x}\""))}]";
     }
 
-    private Type? GetGenericDefinitionOrNull(Type type)
-    {
-        return type.IsGenericType ? type.GetGenericTypeDefinition() : null;
-    }
-
-    private T? SingleNotNullOrNull<T>(IEnumerable<T?> enumerable)
-        where T : class
-    {
-        T? first = null;
-        foreach (var item in enumerable)
-        {
-            if (item is null) continue;
-            if (first is not null) return null;
-            first = item;
-        }
-        return first;
-    }
-
-    /// <summary>
-    /// Recursively unwraps a nested Page argument.
-    /// </summary>
-    /// <param name="responseType">A type to unwrap.</param>
-    /// <returns>The single page argument or null if there isn't exactly one.</returns>
-    private Type? UnwrapPageArgument(Type responseType)
-    {
-        Type? UnwrapPage(Type type)
-        {
-            var genericDefinition = GetGenericDefinitionOrNull(type);
-            if (genericDefinition == typeof(Page<>)) return type;
-            if (genericDefinition != null)
-            {
-                return SingleNotNullOrNull(type.GenericTypeArguments.Select(UnwrapPage));
-            }
-            return null;
-        }
-        var pageType = UnwrapPage(responseType);
-        return pageType?.GenericTypeArguments?[0];
-    }
-
-    private Type? UnwrapQueryArgument(Type responseType)
-    {
-        var genericDef = GetGenericDefinitionOrNull(responseType);
-        if (genericDef == typeof(Query<>))
-        {
-            return responseType.GenericTypeArguments[0];
-        }
-        return null;
-    }
-
     private string GenerateData(IEnumerable<MethodInfo> methods)
     {
         var methodsDict = new Dictionary<string, Dictionary<string, PropertyConfig>>();
         foreach (var method in methods)
         {
             var propertiesDict = new Dictionary<string, PropertyConfig>(StringComparer.InvariantCultureIgnoreCase);
-            var responseType = UnwrapPageArgument(method.ReturnType);
+            var responseType = method.ReturnType.UnwrapPageArgument();
             if (responseType != null)
             {
                 foreach(var prop in responseType.GetProperties())
@@ -102,7 +53,7 @@ public class Generator
                     propertiesDict[prop.SerializationName()] = new PropertyConfig {Response = true, ClrType = prop.PropertyType};
                 }
             }
-            var requestType = method.GetParameters().Select(x => UnwrapQueryArgument(x.ParameterType)).FirstOrDefault(x => x != null);
+            var requestType = method.GetParameters().Select(x => x.ParameterType.UnwrapQueryArgument()).FirstOrDefault(x => x != null);
             if (requestType != null)
             {
                 foreach (var prop in requestType.GetProperties())
