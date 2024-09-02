@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.Extensions.Options;
+using System.Linq.Expressions;
 
 namespace Questripag;
 
@@ -8,8 +9,10 @@ public interface IQueryer
     public IQueryable<TSource> Order<TSource, TQuery>(IQueryable<TSource> source, IOrdering<TQuery> ordering);
 }
 
-internal class Queryer : IQueryer
+internal class Queryer(QueryerOptions? options = null) : IQueryer
 {
+    public QueryerOptions Options { get; set; } = options ?? new();
+
     public IQueryable<TSource> Filter<TSource, TQuery>(IQueryable<TSource> source, IFiltering<TQuery> filtering)
     {
         foreach(var filter in filtering.Filters)
@@ -80,4 +83,12 @@ internal class Queryer : IQueryer
         }
         return Expression.Lambda(body, param);
     }
+}
+
+public class QueryerOptions
+{
+    public StringFilterOperation StringOperation { get; set; } = StringFilterOperation.StartsWith;
+    public DateTimeFilterPrecision DateTimePrecision { get; set; } = DateTimeFilterPrecision.Days;
+    public enum StringFilterOperation { Equals, StartsWith, Contains }
+    public enum DateTimeFilterPrecision { Exact, Seconds, Minutes, Days }
 }
