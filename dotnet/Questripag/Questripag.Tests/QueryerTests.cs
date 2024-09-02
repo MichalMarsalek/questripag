@@ -6,21 +6,20 @@ namespace Questripag.Tests;
 public class QueryerTests
 {
     [Theory(DisplayName = "")]
-    [MemberData(nameof(GetGetFilterPredicateKeys))]
+    [KeyedTestCases(nameof(GetFilterPredicateTestCases))]
     public void QueryerGetFilterPredicate_ReturnsPredicate(string key)
     {
-        var testCase = GetGetFilterPredicateTestCases()[key];
+        var testCase = GetFilterPredicateTestCases[key];
         var queryer = new Queryer();
         var result = queryer.GetFilterPredicate<TestSource, ITestQueryModel>(testCase.Input);
         result.ToString().Should().BeEquivalentTo(testCase.Output.ToString());
     }
 
-    public static Dictionary<string, TestCase<FilterCoordinate<dynamic>, LambdaExpression>> GetGetFilterPredicateTestCases()
-    {
-        FilterCoordinate<dynamic> Filter(string key, params FilterValue<dynamic>[] values) => new(key, values);
-        FilterValue<dynamic> Scalar(dynamic value) => new ScalarFilterValue<dynamic>(value);
-        FilterValue<dynamic> Range(dynamic lower, dynamic upper) => new RangeFilterValue<dynamic>(lower, upper);
-        var cases = new List<TestCase<FilterCoordinate<dynamic>, LambdaExpression>>()
+    public static FilterCoordinate<dynamic> Filter(string key, params FilterValue<dynamic>[] values) => new(key, values);
+    public static FilterValue<dynamic> Scalar(dynamic value) => new ScalarFilterValue<dynamic>(value);
+    public static FilterValue<dynamic> Range(dynamic lower, dynamic upper) => new RangeFilterValue<dynamic>(lower, upper);
+    public static Dictionary<string, TestCase<FilterCoordinate<dynamic>, LambdaExpression>> GetFilterPredicateTestCases =
+        new List<TestCase<FilterCoordinate<dynamic>, LambdaExpression>>()
         {
             new(
                 Filter("Age", Scalar(20)),
@@ -29,10 +28,7 @@ public class QueryerTests
                 Filter("Nested.Property", Scalar("x")),
                 (TestSource x) => "x".Equals((object)x.Nested.Property)
             ),
-        };
-        return cases.ToDictionary(x => x.Output.ToString(), x=> x);
-    }
-    public static IEnumerable<object[]> GetGetFilterPredicateKeys => GetGetFilterPredicateTestCases().Keys.Select(x => new object[] { x });
+        }.ToDictionary(x => x.Output.ToString(), x=> x);
 
     public class TestSource
     {

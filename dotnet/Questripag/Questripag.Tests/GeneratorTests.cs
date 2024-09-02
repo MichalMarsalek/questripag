@@ -11,18 +11,17 @@ public class GeneratorTests
     private string RemoveWhitespace(string text) => Regex.Replace(text, @"\s", "");
 
     [Theory(DisplayName = "")]
-    [MemberData(nameof(GetGetFilterPredicateKeys))]
+    [KeyedTestCases(nameof(GetFilterPredicateTestCases))]
     public void GeneratorGenerate_GeneratesConfig(string key)
     {
-        var testCase = GetGetFilterPredicateTestCases()[key];
+        var testCase = GetFilterPredicateTestCases[key];
         var generator = new Generator.Js.Generator(false);
         var result = generator.Generate(testCase.Input);
         RemoveWhitespace(result.ToString()).Should().EndWithEquivalentOf(RemoveWhitespace(testCase.Output) + ";");
     }
 
-    public static Dictionary<string, TestCase<IEnumerable<MethodInfo>, string>> GetGetFilterPredicateTestCases()
-    {
-        var cases = new List<TestCase<IEnumerable<MethodInfo>, string>>() {
+    public static Dictionary<string, TestCase<IEnumerable<MethodInfo>, string>> GetFilterPredicateTestCases =
+        new List<TestCase<IEnumerable<MethodInfo>, string>>() {
             new(typeof(TestController1).GetMethods(), """
                 {
                     TestEndpoint: {
@@ -50,10 +49,7 @@ public class GeneratorTests
                     }
                 }
             """),
-        };
-        return cases.ToDictionary(x => x.Input.First().DeclaringType!.Name, x => x);
-    }
-    public static IEnumerable<object[]> GetGetFilterPredicateKeys => GetGetFilterPredicateTestCases().Keys.Select(x => new object[] { x });
+        }.ToDictionary(x => x.Input.First().DeclaringType!.Name, x => x);
 
     public class TestController1
     {
