@@ -44,7 +44,10 @@ public class FilterCoordinate<TValue>
     }
 }
 
-public abstract class FilterValue<TValue> { }
+public abstract class FilterValue<TValue>
+{
+    public static implicit operator FilterValue<TValue>(TValue value) => new ScalarFilterValue<TValue>(value);
+}
 
 public class ScalarFilterValue<TValue> : FilterValue<TValue>
 {
