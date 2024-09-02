@@ -23,6 +23,10 @@ public class BinderTests
     public static Dictionary<string, TestCase<string, Query<ITestQueryModel>>> QueryCollectionToQueryTestCases =
         new List<TestCase<string, Query<ITestQueryModel>>>()
         {   new(
+                "page=1@10",
+                new(1, 10, [], [])
+            ),
+            new(
                 "page=1@10&order=name&order=-age",
                 new(1, 10, [], [Order("Name", false), Order("Age", true)])
             ),
