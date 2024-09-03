@@ -1,6 +1,5 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Primitives;
 
 namespace Questripag.Tests;
@@ -28,11 +27,11 @@ public class BinderTests
             ),
             new(
                 "page=1@10&order=name&order=-age",
-                new(1, 10, [], [Order("Name", false), Order("Age", true)])
+                new(1, 10, [], [Order("name", false), Order("age", true)])
             ),
             new(
                 "page=2@50&order=+name&age=18..65&isActive=true&role=Maintainer",
-                new(2, 50, [Filter("Age", Range(18, 65)), Filter("isActive", true), Filter("Role", TestRole.Maintainer)], [Order("Name", false)])
+                new(2, 50, [Filter("age", Range(18, 65)), Filter("isActive", true), Filter("role", TestRole.Maintainer)], [Order("name", false)])
             ),
         }.ToDictionary(x => x.Input, x => x);
 

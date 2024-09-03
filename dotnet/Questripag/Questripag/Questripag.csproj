@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.38" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.38" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.1.0" />
   </ItemGroup>
 
 <ItemGroup>

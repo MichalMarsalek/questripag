@@ -10,7 +10,8 @@ Let's see how you would satisfy such request using this library & EFCore.
 ```cs
 builder.Services
     .AddQueryer()
-    .AddControllers(options => options.AddQueryBinder());
+    .AddControllers(x => x.AddQueryBinder());
+    .AddOpenApiDocument(x => x.AddQueryMapping());
 
 [Route("movie"), ApiController]
 public class MovieController(DbContext dbContext, Queryer queryer): ControllerBase

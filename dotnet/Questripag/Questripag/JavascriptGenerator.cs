@@ -1,17 +1,16 @@
-﻿using System.Reflection;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Web.Mvc;
 
-namespace Questripag.Generator.Js;
+namespace Questripag;
 
-public class Generator
+public class JavascriptGenerator
 {
-    public bool GenerateTs { get; private set; }
-    public Generator(bool generateTs)
+    public bool GenerateTypescript { get; private set; }
+    public JavascriptGenerator(bool generateTs)
     {
-        GenerateTs = generateTs;
+        GenerateTypescript = generateTs;
     }
 
     public string Generate(Assembly assembly)
@@ -19,7 +18,7 @@ public class Generator
 
     public string Generate(IEnumerable<MethodInfo> methods)
     {
-        var asConst = GenerateTs ? " as const" : "";
+        var asConst = GenerateTypescript ? " as const" : "";
         return $"""
             /* tslint:disable */
             /* eslint-disable */
