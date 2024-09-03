@@ -15,7 +15,10 @@ namespace Questripag.TestAPI.Controllers
 
     public interface IQueryOptions
     {
-        public string Prop1 { get; set; }
-        public string Prop2 { get; set; }
+        public int Prop1 { get; set; }
+        public DateOnly Prop2 { get; set; }
+        public LeftOrRight Prop3 { get; set; }
     }
+
+    public enum LeftOrRight { Left, Right };
 }

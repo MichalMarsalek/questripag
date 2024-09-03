@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Questripag.Generator.Js;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -15,7 +14,7 @@ public class GeneratorTests
     public void GeneratorGenerate_GeneratesConfig(string key)
     {
         var testCase = GetFilterPredicateTestCases[key];
-        var generator = new Generator.Js.Generator(false);
+        var generator = new JavascriptGenerator(false);
         var result = generator.Generate(testCase.Input);
         RemoveWhitespace(result.ToString()).Should().EndWithEquivalentOf(RemoveWhitespace(testCase.Output) + ";");
     }
