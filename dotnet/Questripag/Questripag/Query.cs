@@ -7,40 +7,22 @@ public interface IPaging
     public int Skip { get; }
 }
 
-public interface IFiltering<TQueryModel>
-{
-    public IEnumerable<FilterCoordinate<object>> Filters { get; }
-}
-public interface IOrdering<TQueryModel>
-{
-    public IEnumerable<OrderCoordinate> Orders { get; }
-}
-
-public class Query<TQueryModel> : IPaging, IFiltering<TQueryModel>, IOrdering<TQueryModel>
+public class Query<TFilter, TOrder> : IPaging
+    where TFilter : notnull
+    where TOrder : notnull
 {
     public int Page { get; private set; }
     public int PageSize { get; private set; }
     public int Skip => (Page - 1) * PageSize;
-    public IEnumerable<FilterCoordinate<object>> Filters { get; private set; }
-    public IEnumerable<OrderCoordinate> Orders { get; private set; }
+    public TFilter Filter { get; private set; }
+    public TOrder Order { get; private set; }
 
-    public Query(int page, int pageSize, IEnumerable<FilterCoordinate<object>> filters, IEnumerable<OrderCoordinate> orders)
+    public Query(int page, int pageSize, TFilter filter, TOrder order)
     {
         Page = page;
         PageSize = pageSize;
-        Filters = filters;
-        Orders = orders;
-    }
-}
-
-public class FilterCoordinate<TValue>
-{
-    public string Key { get; private set; }
-    public IEnumerable<FilterValue<TValue>> Value {get; private set; }
-    public FilterCoordinate(string key, IEnumerable<FilterValue<TValue>> value)
-    {
-        Key = key;
-        Value = value;
+        Filter = filter;
+        Order = order;
     }
 }
 
@@ -71,12 +53,19 @@ public class RangeFilterValue<TValue> : FilterValue<TValue>
 
 public class OrderCoordinate
 {
-    public string Key { get; private set; }
-    public bool IsDescending { get; private set; }
+    public int Precedence { get; private set; }
+    public OrderDirection Direction { get; private set; }
 
-    public OrderCoordinate(string key, bool isDescending)
+    public OrderCoordinate(int precedence, OrderDirection direction)
     {
-        Key = key;
-        IsDescending = isDescending;
+        Precedence = precedence;
+        Direction = direction;
     }
+}
+
+public enum OrderDirection
+{
+    Descending = -1,
+    None = 0,
+    Ascending = 1,
 }
