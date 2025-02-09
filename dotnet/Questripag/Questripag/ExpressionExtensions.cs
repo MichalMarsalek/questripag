@@ -10,8 +10,8 @@ public static class ExpressionExtensions
     public static Expression<Func<T1, T3>> ComposeByInlining<T1, T2, T3>(this Expression<Func<T2, T3>> outer, Expression<Func<T1, T2>> inner)
         => Expression.Lambda<Func<T1, T3>>(outer.Body.Substitute(outer.Parameters[0], inner.Body), inner.Parameters[0]);
 
-    public static LambdaExpression ComposeByInlining(this LambdaExpression outer, LambdaExpression inner)
-        => Expression.Lambda(outer.Body.Substitute(outer.Parameters[0], inner.Body), inner.Parameters[0]);
+    public static Expression<Func<TIn, TOut>> ComposeByInlining<TIn, TOut>(this LambdaExpression outer, LambdaExpression inner)
+        => Expression.Lambda<Func<TIn, TOut>>(outer.Body.Substitute(outer.Parameters[0], inner.Body), inner.Parameters[0]);
 
     public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
         => Expression.Lambda<Func<T, bool>>(Expression.OrElse(left.Body, right.Body.Substitute(right.Parameters[0], left.Parameters[0])), left.Parameters[0]);

@@ -26,46 +26,48 @@ public class Query<TFilter, TOrder> : IPaging
     }
 }
 
-public abstract class FilterValue<TValue>
+public abstract class Filter
 {
-    public static implicit operator FilterValue<TValue>(TValue value) => new ScalarFilterValue<TValue>(value);
+    public StringFilterOperation StringOperation { get; set; }
+    public DateTimeFilterPrecision DateTimePrecision { get; set; }
+    internal abstract IEnumerable<object> UntypedValues { get; }
+    internal abstract IEnumerable<(object?, object?)> UntypedRanges{ get; }
 }
 
-public class ScalarFilterValue<TValue> : FilterValue<TValue>
+public class Filter<TValue> : Filter
 {
-    public TValue Value { get; private set; }
-    public ScalarFilterValue(TValue value)
+    public IEnumerable<TValue> Values { get; init; } = [];
+    public IEnumerable<(TValue, TValue)> Ranges { get; init; } = [];
+
+    internal override IEnumerable<object> UntypedValues => Values.Cast<object>();
+
+    internal override IEnumerable<(object?, object?)> UntypedRanges => Values.Cast<(object?, object?)>();
+
+    public static implicit operator Filter<TValue>(TValue value) => new Filter<TValue> { Values = [value] };
+
+    public Filter<TValue> WithStringOperation(StringFilterOperation operation)
     {
-        Value = value;
+        StringOperation = operation;
+        return this;
+    }
+    public Filter<TValue> WithDateTimePrecision(DateTimeFilterPrecision precision)
+    {
+        DateTimePrecision = precision;
+        return this;
     }
 }
 
-public class RangeFilterValue<TValue> : FilterValue<TValue>
-{
-    public TValue LowerBound { get; private set; }
-    public TValue UpperBound { get; private set; }
-    public RangeFilterValue(TValue lowerBound, TValue upperBound)
-    {
-        LowerBound = lowerBound;
-        UpperBound = upperBound;
-    }
-}
-
-public class OrderCoordinate
+public class Order
 {
     public int Precedence { get; private set; }
-    public OrderDirection Direction { get; private set; }
+    public bool IsDescending { get; private set; }
 
-    public OrderCoordinate(int precedence, OrderDirection direction)
+    public Order(int precedence, bool isDescending)
     {
         Precedence = precedence;
-        Direction = direction;
+        IsDescending = isDescending;
     }
 }
 
-public enum OrderDirection
-{
-    Descending = -1,
-    None = 0,
-    Ascending = 1,
-}
+public enum StringFilterOperation { Equals, StartsWith, Contains }
+public enum DateTimeFilterPrecision { Exact, Seconds, Minutes, Days }

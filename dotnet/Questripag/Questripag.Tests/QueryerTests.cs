@@ -15,8 +15,8 @@ public class QueryerTests
         result.ToString().Should().BeEquivalentTo(testCase.Output.ToString());
     }
 
-    public static FilterCoordinate<dynamic> Filter(string key, params FilterValue<dynamic>[] values) => new(key, values);
-    public static FilterValue<dynamic> Range(dynamic lower, dynamic upper) => new RangeFilterValue<dynamic>(lower, upper);
+    public static FilterCoordinate<dynamic> Filter(string key, params Filter<dynamic>[] values) => new(key, values);
+    public static Filter<dynamic> Range(dynamic lower, dynamic upper) => new RangeFilterValue<dynamic>(lower, upper);
     public static Dictionary<string, TestCase<FilterCoordinate<dynamic>, LambdaExpression>> GetFilterPredicateTestCases =
         new List<TestCase<FilterCoordinate<dynamic>, LambdaExpression>>()
         {

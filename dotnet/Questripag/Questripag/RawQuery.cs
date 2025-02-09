@@ -9,9 +9,9 @@ public class RawQuery
     public int PageSize { get; private set; }
     public int Skip => (Page - 1) * PageSize;
     public IEnumerable<RawFilterCoordinate> Filters { get; private set; }
-    public IEnumerable<OrderCoordinate> Orders { get; private set; }
+    public IEnumerable<Order> Orders { get; private set; }
 
-    public RawQuery(int page, int pageSize, IEnumerable<RawFilterCoordinate> filters, IEnumerable<OrderCoordinate> orders)
+    public RawQuery(int page, int pageSize, IEnumerable<RawFilterCoordinate> filters, IEnumerable<Order> orders)
     {
         Page = page;
         PageSize = pageSize;
@@ -23,8 +23,8 @@ public class RawQuery
 public class RawFilterCoordinate
 {
     public string Key { get; private set; }
-    public IEnumerable<FilterValue<string>> Value {get; private set; }
-    public RawFilterCoordinate(string key, IEnumerable<FilterValue<string>> value)
+    public IEnumerable<Filter<string>> Value {get; private set; }
+    public RawFilterCoordinate(string key, IEnumerable<Filter<string>> value)
     {
         Key = key;
         Value = value;

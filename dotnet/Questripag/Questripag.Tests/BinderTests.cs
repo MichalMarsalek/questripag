@@ -16,9 +16,9 @@ public class BinderTests
         var input = ParseQueryCollection(testCase.Input);
         binder.QueryCollectionToQuery(input).Should().BeEquivalentTo(testCase.Output);
     }
-    public static FilterCoordinate<object> Filter(string key, params FilterValue<object>[] values) => new(key, values);
-    public static FilterValue<object> Range(object lower, object upper) => new RangeFilterValue<object>(lower, upper);
-    public static OrderCoordinate Order(string key, bool isDescending) => new(key, isDescending);
+    public static FilterCoordinate<object> Filter(string key, params Filter<object>[] values) => new(key, values);
+    public static Filter<object> Range(object lower, object upper) => new RangeFilterValue<object>(lower, upper);
+    public static Order Order(string key, bool isDescending) => new(key, isDescending);
 
     public static Dictionary<string, TestCase<string, Query<ITestQueryModel>>> QueryCollectionToQueryTestCases =
         new List<TestCase<string, Query<ITestQueryModel>>>()
