@@ -15,6 +15,8 @@ public static class IQueryableExtensions
         => source.Where(GetPredicate(selector, value));
 
     public static IQueryable<TSource> Where<TSource, TFilter, TOrder>(this IQueryable<TSource> source, Query<TFilter, TOrder> query)
+        where TFilter : class, new()
+        where TOrder : class, new()
     {
         var x = Expression.Parameter(typeof(TSource), "x");
         void ApplyWheres(Expression path, object? filter)
@@ -40,6 +42,8 @@ public static class IQueryableExtensions
     }
 
     public static IQueryable<TSource> OrderBy<TSource, TFilter, TOrder>(this IQueryable<TSource> source, Query<TFilter, TOrder> query)
+        where TFilter : class, new()
+        where TOrder : class, new()
         => throw new NotImplementedException();
 
     public static DeferredOrderedQueryable<TSource> OrderBy<TSource, TProperty>(IQueryable<TSource> source, Expression<Func<TSource, TProperty>> selector, Order order)

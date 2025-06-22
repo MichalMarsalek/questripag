@@ -8,8 +8,8 @@ public interface IPaging
 }
 
 public class Query<TFilter, TOrder> : IPaging
-    where TFilter : notnull
-    where TOrder : notnull
+    where TFilter : class, new()
+    where TOrder : class, new()
 {
     public int Page { get; private set; }
     public int PageSize { get; private set; }
@@ -30,20 +30,21 @@ public abstract class Filter
 {
     public StringFilterOperation StringOperation { get; set; }
     public DateTimeFilterPrecision DateTimePrecision { get; set; }
-    internal abstract IEnumerable<object> UntypedValues { get; }
-    internal abstract IEnumerable<(object?, object?)> UntypedRanges{ get; }
+    internal List<object> UntypedValues { get; set; } = [];
+    internal List<(object?, object?)> UntypedRanges { get; set; } = [];
 }
 
 public class Filter<TValue> : Filter
 {
-    public IEnumerable<TValue> Values { get; init; } = [];
-    public IEnumerable<(TValue, TValue)> Ranges { get; init; } = [];
+    public IEnumerable<TValue> TypedValues => UntypedValues.Cast<TValue>();
 
-    internal override IEnumerable<object> UntypedValues => Values.Cast<object>();
+    public IEnumerable<(TValue?, TValue?)> TypedRanges => UntypedRanges.Select(x => ((TValue?)x.Item1, (TValue?)x.Item2));
 
-    internal override IEnumerable<(object?, object?)> UntypedRanges => Values.Cast<(object?, object?)>();
+    public static implicit operator Filter<TValue>(TValue value) => new Filter<TValue> { UntypedValues = [value] };
 
-    public static implicit operator Filter<TValue>(TValue value) => new Filter<TValue> { Values = [value] };
+    public static implicit operator Filter<TValue>(List<TValue> values) => new Filter<TValue> { UntypedValues = [..values] };
+
+    public static implicit operator Filter<TValue>((TValue?, TValue?) range) => new Filter<TValue> { UntypedRanges = [range] };
 
     public Filter<TValue> WithStringOperation(StringFilterOperation operation)
     {

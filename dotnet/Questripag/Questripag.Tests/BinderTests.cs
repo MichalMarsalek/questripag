@@ -12,27 +12,34 @@ public class BinderTests
     public void BinderQueryCollectionToQuery_ReturnsQuery(string key)
     {
         var testCase = QueryCollectionToQueryTestCases[key];
-        var binder = new QueryBinder<ITestQueryModel>(new QueryBinderProvider());
+        var binder = new QueryBinder<TestFilterModel, TestOrderModel>(new QueryBinderProvider());
         var input = ParseQueryCollection(testCase.Input);
-        binder.QueryCollectionToQuery(input).Should().BeEquivalentTo(testCase.Output);
+        var output = testCase.Output;
+        output.Filter.Nested ??= new();
+        output.Order.Nested ??= new();
+        binder.QueryCollectionToQuery(input).Should().BeEquivalentTo(output);
     }
-    public static FilterCoordinate<object> Filter(string key, params Filter<object>[] values) => new(key, values);
-    public static Filter<object> Range(object lower, object upper) => new RangeFilterValue<object>(lower, upper);
-    public static Order Order(string key, bool isDescending) => new(key, isDescending);
 
-    public static Dictionary<string, TestCase<string, Query<ITestQueryModel>>> QueryCollectionToQueryTestCases =
-        new List<TestCase<string, Query<ITestQueryModel>>>()
+    public static Order Asc(int prec = 0) => new(prec, false);
+    public static Order Desc(int prec = 0) => new(prec, true);
+
+    public static Dictionary<string, TestCase<string, Query<TestFilterModel, TestOrderModel>>> QueryCollectionToQueryTestCases =
+        new List<TestCase<string, Query<TestFilterModel, TestOrderModel>>>()
         {   new(
                 "page=1@10",
-                new(1, 10, [], [])
+                new(1, 10, new(), new())
             ),
             new(
                 "page=1@10&order=name&order=-age",
-                new(1, 10, [], [Order("Name", false), Order("Age", true)])
+                new(1, 10, new(), new(){Name = Asc(), Age = Desc(1)})
             ),
             new(
-                "page=2@50&order=+name&age=18..65&isActive=true&role=Maintainer",
-                new(2, 50, [Filter("Age", Range(18, 65)), Filter("isActive", true), Filter("Role", TestRole.Maintainer)], [Order("Name", false)])
+                "page=2@50&order=+name&age=18..65&isActive=true&role=Maintainer|Owner",
+                new(2, 50, new(){Age = (18, 65), AlsoRenamedProp = true, Role = new List<TestRole> { TestRole.Maintainer, TestRole.Owner } }, new(){Name = Asc()})
+            ),
+            new(
+                "page=1@50&nested.property=xx|yy",
+                new(1, 50, new(){Nested = new() {Property = "xx|yy" } }, new())
             ),
         }.ToDictionary(x => x.Input, x => x);
 
